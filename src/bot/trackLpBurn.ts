@@ -44,11 +44,13 @@ export async function trackLpBurn(pair: PhotonPairData) {
       if (socials.length) {
         for (const [social, socialLink] of socials) {
           if (socialLink) {
-            socialsText += `*├─* [${toTitleCase(social)}](${socialLink})`;
+            socialsText += `\n       *├─* [${toTitleCase(
+              social
+            )}](${socialLink})`;
           }
         }
       } else {
-        socialsText += `*├─* No Links Available`;
+        socialsText += `\n       *├─* No Links Available`;
       }
 
       const change = (mcap / initialMC).toFixed(2);
