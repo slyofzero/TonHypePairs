@@ -6,7 +6,6 @@ import { sendAlert } from "./bot/sendAlert";
 import { PhotonPairs } from "./types/livePairs";
 import { rpcConfig } from "./rpc";
 import { cleanUpHypePairs } from "./bot/cleanUpHypePairs";
-import { trackMC } from "./bot/trackMC";
 
 if (!BOT_TOKEN || !DATA_URL) {
   log("BOT_TOKEN or WSS_URL or DATA_URL is missing");
@@ -31,14 +30,13 @@ log("Bot instance ready");
 
       const pairs = (await response.json()) as PhotonPairs;
       await sendAlert(pairs.data);
-      trackMC();
     } catch (error) {
       errorHandler(error);
     } finally {
       setTimeout(toRepeat, 60 * 1e3);
     }
 
-    setInterval(cleanUpHypePairs, 60 * 60 * 1e3);
+    setInterval(cleanUpHypePairs, 60 * 1e3);
   }
 
   toRepeat();

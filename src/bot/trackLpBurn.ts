@@ -1,27 +1,36 @@
-import { hardCleanUpBotMessage } from "@/utils/bot";
-import { CHANNEL_ID } from "@/utils/env";
+import { cleanUpBotMessage, hardCleanUpBotMessage } from "@/utils/bot";
+import { BURN_CHANNEL_ID } from "@/utils/env";
 import { teleBot } from "..";
 import { hypeNewPairs } from "@/vars/tokens";
 import { errorHandler, log } from "@/utils/handlers";
 import { PhotonPairData } from "@/types/livePairs";
+import { formatToInternational, toTitleCase } from "@/utils/general";
 import { promoText } from "@/vars/promo";
 
 export async function trackLpBurn(pair: PhotonPairData) {
   try {
-    if (!CHANNEL_ID) {
-      log("CHANNEL_ID is undefined");
+    if (!BURN_CHANNEL_ID) {
+      log("BURN_CHANNEL_ID is undefined");
       process.exit(1);
     }
 
-    const { address, tokenAddress, symbol, audit } = pair.attributes;
-    const { lp_burned_perc } = audit;
-    const { lpStatus, launchMessage, ...rest } = hypeNewPairs[tokenAddress];
+    const {
+      address,
+      tokenAddress,
+      symbol,
+      audit,
+      socials: storedSocials,
+      cur_liq,
+      fdv: mcap,
+    } = pair.attributes;
+    const { lp_burned_perc, top_holders_perc } = audit;
+    const { lpStatus, initialMC, ...rest } = hypeNewPairs[tokenAddress];
     const isLpStatusOkay = lp_burned_perc === 100;
 
     if (!lpStatus && isLpStatusOkay) {
       hypeNewPairs[tokenAddress] = {
         lpStatus: true,
-        launchMessage,
+        initialMC,
         ...rest,
       };
 
@@ -29,24 +38,51 @@ export async function trackLpBurn(pair: PhotonPairData) {
       const tokenLink = `https://solscan.io/token/${tokenAddress}`;
       const dexScreenerLink = `https://dexscreener.com/solana/${address}`;
       const birdEyeLink = `https://birdeye.so/token/${tokenAddress}?chain=solana`;
-      const photonLink = `https://photon-sol.tinyastro.io/en/r/@solhypealerts/${tokenAddress}`;
 
-      const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
+      let socialsText = "📱 *Socials*";
+      const socials = Object.entries(storedSocials || {});
+      if (socials.length) {
+        for (const [social, socialLink] of socials) {
+          if (socialLink) {
+            socialsText += `*├─* [${toTitleCase(social)}](${socialLink})`;
+          }
+        }
+      } else {
+        socialsText += `*├─* No Links Available`;
+      }
+
+      const change = (mcap / initialMC).toFixed(2);
+
+      const text = `🔥 *New Liquidity Burn for ${hardCleanUpBotMessage(
+        symbol
+      )}\\!* 🔥
       
-[${hardCleanUpBotMessage(symbol)}](${tokenLink}) LP tokens burnt 🔥🔥🔥 
+${socialsText}
 
-Token Contract:
-\`${tokenAddress}\`
+🏠 *Address:* \`${tokenAddress}\`
 
-[Photon](${photonLink})
-[DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink})${promoText}`;
+💧 *Liquidity*: $${cleanUpBotMessage(
+        formatToInternational(Number(cur_liq.usd))
+      )}
+
+📊 *MarketCap*
+       *├─ Launch:* $${cleanUpBotMessage(formatToInternational(initialMC))}
+       *├─ Now:* $${cleanUpBotMessage(
+         formatToInternational(mcap)
+       )} \\(x${cleanUpBotMessage(change)}\\)
+
+💰 *Holders*
+       *├─ LP:* ${cleanUpBotMessage(100 - lp_burned_perc)}%
+       *├─ Top10:* ${cleanUpBotMessage(top_holders_perc)}%
+
+🔗 Links: [DexScreener](${dexScreenerLink}) \\| [BirdEye](${birdEyeLink}) \\| [SolScan](${tokenLink})
+${promoText}`;
 
       teleBot.api
-        .sendMessage(CHANNEL_ID, text, {
+        .sendMessage(BURN_CHANNEL_ID, text, {
           parse_mode: "MarkdownV2",
           // @ts-expect-error Param not found
           disable_web_page_preview: true,
-          reply_parameters: { message_id: launchMessage },
         })
         .then(() => log(`Sent message for ${address}`))
         .catch((e) => {

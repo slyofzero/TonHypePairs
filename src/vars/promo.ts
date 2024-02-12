@@ -1,5 +1,5 @@
 export let promoText = "";
 
 export function setPromoText(newPromoText: string) {
-  promoText = `\n*Promo*\n${newPromoText}`;
+  promoText = `\n*🎺 _Sponsered Ad_*\n*${newPromoText}*`;
 }

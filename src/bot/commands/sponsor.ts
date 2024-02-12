@@ -1,15 +1,15 @@
 import { setPromoText } from "@/vars/promo";
 import { CommandContext, Context } from "grammy";
 
-export async function promo(ctx: CommandContext<Context>) {
+export async function sponsor(ctx: CommandContext<Context>) {
   const { match } = ctx;
 
   if (!match) {
     return ctx.reply(
-      "No promo text passed, use command like this -\n/promo This is a promo"
+      "No sponsor text passed, use command like this -\n/sponsor This is a sponsor"
     );
   }
 
   setPromoText(match);
-  ctx.reply(`Promo text set as - ${match}`);
+  ctx.reply(`Sponsor text set as - ${match}`);
 }
