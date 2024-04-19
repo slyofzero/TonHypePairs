@@ -2,7 +2,7 @@ import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
 import { log } from "./utils/handlers";
 import { BOT_TOKEN, DEX_URL, HTTP_CLIENT } from "./utils/env";
-import { sendAlert } from "./bot/sendAlert.1";
+import { sendAlert } from "./bot/sendAlert";
 import { cleanUpHypePairs } from "./bot/cleanUpHypePairs";
 import { WebSocket } from "ws";
 import { wssHeaders } from "./utils/constants";
@@ -10,6 +10,7 @@ import { WSSPairData } from "./types/wssPairsData";
 import { getNowTimestamp, getSecondsElapsed } from "./utils/time";
 import { Api, HttpClient } from "tonapi-sdk-js";
 import { setLpLocks } from "./vars/lpLocks";
+import { trackMC } from "./bot/trackMc";
 
 if (!BOT_TOKEN) {
   log("BOT_TOKEN or WSS_URL is missing");
@@ -61,9 +62,10 @@ export const client = new Api(httpClient);
       const { pairs } = data as { pairs: WSSPairData[] | undefined };
       const lastFetched = getSecondsElapsed(fetchedAt);
 
-      if (pairs && lastFetched > 60) {
+      if (pairs && lastFetched > 10) {
         fetchedAt = getNowTimestamp();
         await sendAlert(pairs);
+        trackMC();
 
         cleanUpHypePairs();
       }
