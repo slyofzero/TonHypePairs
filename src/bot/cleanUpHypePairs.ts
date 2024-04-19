@@ -4,7 +4,6 @@ import { hypeNewPairs } from "@/vars/tokens";
 export function cleanUpHypePairs() {
   const now = Math.floor(Date.now() / 1e3);
   const tokensToRemove = [];
-  log("Cleanup initiated");
 
   for (const token in hypeNewPairs) {
     const { startTime } = hypeNewPairs[token];
