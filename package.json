@@ -30,9 +30,11 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.90.0",
+    "@ton/ton": "^13.11.1",
     "dotenv": "^16.3.1",
     "grammy": "^1.20.3",
     "moment": "^2.29.4",
+    "tonapi-sdk-js": "^1.0.7",
     "ws": "^8.16.0"
   }
 }

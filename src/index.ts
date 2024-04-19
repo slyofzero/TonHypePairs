@@ -1,43 +1,77 @@
 import { Bot } from "grammy";
 import { initiateBotCommands, initiateCallbackQueries } from "./bot";
-import { errorHandler, log } from "./utils/handlers";
-import { BOT_TOKEN, DATA_URL, PHOTON_COOKIE } from "./utils/env";
-import { sendAlert } from "./bot/sendAlert";
-import { PhotonPairs } from "./types/livePairs";
-import { rpcConfig } from "./rpc";
+import { log } from "./utils/handlers";
+import { BOT_TOKEN, DEX_URL, HTTP_CLIENT } from "./utils/env";
+import { sendAlert } from "./bot/sendAlert.1";
 import { cleanUpHypePairs } from "./bot/cleanUpHypePairs";
+import { WebSocket } from "ws";
+import { wssHeaders } from "./utils/constants";
+import { WSSPairData } from "./types/wssPairsData";
+import { getNowTimestamp, getSecondsElapsed } from "./utils/time";
+import { Api, HttpClient } from "tonapi-sdk-js";
+import { setLpLocks } from "./vars/lpLocks";
 
-if (!BOT_TOKEN || !DATA_URL) {
-  log("BOT_TOKEN or WSS_URL or DATA_URL is missing");
+if (!BOT_TOKEN) {
+  log("BOT_TOKEN or WSS_URL is missing");
   process.exit(1);
 }
 
 export const teleBot = new Bot(BOT_TOKEN);
 log("Bot instance ready");
 
+let fetchedAt: number = 0;
+
+if (!DEX_URL) {
+  log("DEX_URL is undefined");
+  process.exit(1);
+}
+
+const httpClient = new HttpClient({
+  baseUrl: HTTP_CLIENT,
+});
+export const client = new Api(httpClient);
+
 (async function () {
-  rpcConfig();
   teleBot.start();
   log("Telegram bot setup");
   initiateBotCommands();
   initiateCallbackQueries();
 
-  async function toRepeat() {
-    try {
-      const response = await fetch(DATA_URL || "", {
-        headers: { Cookie: `_photon_ta=${PHOTON_COOKIE}` },
-      });
+  await Promise.all([setLpLocks()]);
+  const ws = new WebSocket(DEX_URL, { headers: wssHeaders });
 
-      const pairs = (await response.json()) as PhotonPairs;
-      await sendAlert(pairs.data);
-    } catch (error) {
-      errorHandler(error);
-    } finally {
-      setTimeout(toRepeat, 60 * 1e3);
-    }
+  function connectWebSocket() {
+    ws.on("open", function open() {
+      log("Connected");
+    });
 
-    setInterval(cleanUpHypePairs, 60 * 1e3);
+    ws.on("close", function close() {
+      log("Disconnected");
+      process.exit(1);
+    });
+
+    ws.on("error", function error() {
+      log("Error");
+      process.exit(1);
+    });
+
+    ws.on("message", async (event) => {
+      const str = event.toString();
+      const data = JSON.parse(str);
+      const { pairs } = data as { pairs: WSSPairData[] | undefined };
+      const lastFetched = getSecondsElapsed(fetchedAt);
+
+      if (pairs && lastFetched > 60) {
+        fetchedAt = getNowTimestamp();
+        await sendAlert(pairs);
+
+        cleanUpHypePairs();
+      }
+    });
   }
 
-  toRepeat();
+  connectWebSocket();
+  setInterval(() => {
+    setLpLocks();
+  }, 5 * 60 * 1e3);
 })();

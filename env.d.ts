@@ -4,10 +4,10 @@ declare global {
       BOT_TOKEN: string | undefined;
       BOT_USERNAME: string | undefined;
       TOKENS_CHANNEL_ID: string | undefined;
-      BURN_CHANNEL_ID: string | undefined;
-      DATA_URL: string | undefined;
-      PHOTON_COOKIE: string | undefined;
-      RPC_ENDPOINT: string | undefined;
+      DEX_URL: string | undefined;
+      TONCLIENT_ENDPOINT: string | undefined;
+      TONCLIENT_API_KEY: string | undefined;
+      HTTP_CLIENT: string | undefined;
     }
   }
 }
