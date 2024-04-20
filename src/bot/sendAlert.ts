@@ -10,7 +10,6 @@ import { WSSPairData } from "@/types/wssPairsData";
 import { Address } from "@ton/ton";
 import { sleep } from "@/utils/time";
 import { getLpLocked } from "@/utils/alert";
-import { trackLpLock } from "./trackLpLock";
 
 export async function sendAlert(pairs: WSSPairData[]) {
   if (!TOKENS_CHANNEL_ID) {
@@ -37,9 +36,11 @@ export async function sendAlert(pairs: WSSPairData[]) {
         Number(age.replace("a minutes ago", "1")) ||
         Number(age.replace("a few seconds ago", "1"));
 
-      if (alreadyInHypePairs) {
-        trackLpLock(pair);
-      } else if (ageMinutes <= AGE_THRESHOLD && cur_liq.quote > 50) {
+      if (
+        !alreadyInHypePairs &&
+        ageMinutes <= AGE_THRESHOLD &&
+        cur_liq.quote > 50
+      ) {
         const { pairAddress: address } = pair;
 
         // Links
