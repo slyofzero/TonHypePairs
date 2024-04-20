@@ -1,4 +1,4 @@
-import { AGE_THRESHOLD, scoreIcons, scoreTexts } from "@/utils/constants";
+import { AGE_THRESHOLD } from "@/utils/constants";
 import { formatToInternational } from "@/utils/general";
 import { hypeNewPairs } from "@/vars/tokens";
 import { client, teleBot } from "..";
@@ -9,7 +9,7 @@ import moment from "moment";
 import { WSSPairData } from "@/types/wssPairsData";
 import { Address } from "@ton/ton";
 import { sleep } from "@/utils/time";
-import { generateHypeScore, getLpLocked } from "@/utils/alert";
+import { getLpLocked } from "@/utils/alert";
 import { trackLpLock } from "./trackLpLock";
 
 export async function sendAlert(pairs: WSSPairData[]) {
@@ -20,7 +20,13 @@ export async function sendAlert(pairs: WSSPairData[]) {
 
   for (const pair of pairs) {
     try {
-      const { marketCap, liquidity: cur_liq, pairCreatedAt, baseToken } = pair;
+      const {
+        marketCap,
+        liquidity: cur_liq,
+        pairCreatedAt,
+        baseToken,
+        dexId,
+      } = pair;
       const { address: tokenAddress, symbol, name } = baseToken;
 
       const alreadyInHypePairs = hypeNewPairs[tokenAddress];
@@ -52,18 +58,14 @@ export async function sendAlert(pairs: WSSPairData[]) {
         );
 
         // Holders info
+        const holders = await client.jettons.getJettonHolders(tokenAddress);
         const info = await client.jettons.getJettonInfo(tokenAddress);
         const { mintable, total_supply, metadata } = info;
 
         const { decimals } = metadata;
         const totalSupply = Math.floor(Number(total_supply) / 10 ** Number(decimals)); // prettier-ignore
-        const holders = await client.jettons.getJettonHolders(tokenAddress);
 
-        const { lpStatus, locked } = await getLpLocked(
-          tokenAddress,
-          info,
-          holders
-        );
+        const { lpStatus } = await getLpLocked(tokenAddress, info, holders);
 
         let top10Hold = 0;
         const balancesText = holders.addresses
@@ -84,24 +86,7 @@ export async function sendAlert(pairs: WSSPairData[]) {
 
         if (top10Hold > 100) top10Hold = 100;
 
-        // Token audit
-        const lockStatus = locked > 80 ? "🟩" : "⚠️";
-        const mintStatus = mintable ? "🟥" : "🟩";
         const mintText = mintable ? "Enabled" : "Disabled";
-        const top10HoldStatus = top10Hold < 50 ? "🟩" : "🟥";
-        const top10HoldText = top10Hold < 50 ? "\\<50% of total supply" : "\\>50% of total supply"; // prettier-ignore
-
-        let score = 0;
-        if (locked > 80) score += 1;
-        if (!mintable) score += 1;
-        if (top10Hold < 50) score += 1;
-
-        const scoreText = scoreTexts[score];
-        const scoreIcon = scoreIcons[score];
-        const scoreIconsText = `${scoreIcon}${scoreIcon}${scoreIcon}`;
-        const issues = 3 - score;
-        const issuesText = issues > 0 ? "issues" : "issue";
-        const hypeScore = generateHypeScore(score);
 
         // Text
         const text = `Powered By [Ton Hype Alerts](https://t.me/TonHypeAlerts) \\| Hype Alert
@@ -110,24 +95,22 @@ ${hardCleanUpBotMessage(name)} \\| [${hardCleanUpBotMessage(
           symbol
         )}](${tokenLink})
 
-*Hype: ${hypeScore}/100*
-
 Supply: ${cleanUpBotMessage(formatToInternational(totalSupply || 0))}
 ⌚ Age: ${age}
 💰 MCap: $${cleanUpBotMessage(formatToInternational(marketCap))}
-🏦 Lp TON: ${liquidity} TON *\\($${liquidityUsd}\\)*
+🏦 Liquidity: ${liquidity} TON *\\($${liquidityUsd}\\)*
 👥 Top 10 Holders: Own ${cleanUpBotMessage(top10Hold.toFixed(2))}%
 👥 Top Holders:
 ${balancesText}
 
-🧠 Score: ${scoreText} \\(${issues} ${issuesText}\\) ${scoreIconsText}
-${mintStatus} Mint: ${mintText}
-${lockStatus} LP Status \\- ${lpStatus}
-${top10HoldStatus} Top 10 holders hold ${top10HoldText}
+Mint \\- ${mintText}
+LP Status \\- ${lpStatus}
+Dex \\- \`${dexId}\`
 
 Token Contract:
 \`${tokenAddress}\`
 
+📊 [Chart](${dexScreenerLink})
 🫧 Socials: ${socialsText}
 🔗 Links: [DexScreener](${dexScreenerLink}) \\| [TonViewer](${tokenLink})
 

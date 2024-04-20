@@ -1,11 +1,11 @@
 {
   "chainId": "ton",
   "dexId": "dedust",
-  "pairAddress": "EQChH9YqB7EL8E-kELPJLBWR7eopmVJaBJB7pWAhVUjROD5D",
+  "pairAddress": "EQDk9VBbf948KDfnB9A7-21Jbd3XVw-ogJdcz9VolV61lLuS",
   "baseToken": {
-    "address": "EQD2E_-wz5tvlNMArpjlhnLo-W3Q0sDtt56a6dKg2WjY-RzA",
-    "name": "Britt",
-    "symbol": "BRITT"
+    "address": "EQArvXSHo-2NdlwbnQZtEU6_z3rZ8tIg84lE81hVJKInvy5g",
+    "name": "Bottle Cap",
+    "symbol": "NUKA"
   },
   "quoteToken": {
     "address": "EQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM9c",
@@ -13,23 +13,23 @@
     "symbol": "TON"
   },
   "quoteTokenSymbol": "TON",
-  "price": "0.0000002487",
-  "priceUsd": "0.000001753",
+  "price": "0.000000001618",
+  "priceUsd": "0.000000009795",
   "txns": {
-    "m5": { "buys": 16, "sells": 0 },
-    "h1": { "buys": 16, "sells": 0 },
-    "h6": { "buys": 16, "sells": 0 },
-    "h24": { "buys": 16, "sells": 0 }
+    "m5": { "buys": 3, "sells": 0 },
+    "h1": { "buys": 3, "sells": 0 },
+    "h6": { "buys": 3, "sells": 0 },
+    "h24": { "buys": 3, "sells": 0 }
   },
-  "buyers": { "m5": 16, "h1": 16, "h6": 16, "h24": 16 },
+  "buyers": { "m5": 3, "h1": 3, "h6": 3, "h24": 3 },
   "sellers": { "m5": 0, "h1": 0, "h6": 0, "h24": 0 },
-  "makers": { "m5": 16, "h1": 16, "h6": 16, "h24": 16 },
-  "volume": { "m5": 485.84, "h1": 485.84, "h6": 485.84, "h24": 485.84 },
-  "volumeBuy": { "m5": 485.84, "h1": 485.84, "h6": 485.84, "h24": 485.84 },
-  "priceChange": { "m5": 140, "h1": 140, "h6": 140, "h24": 140 },
-  "liquidity": { "usd": 2023.89, "base": 568111178, "quote": 145.7461 },
-  "marketCap": 1754,
-  "pairCreatedAt": 1713176186000,
+  "makers": { "m5": 3, "h1": 3, "h6": 3, "h24": 3 },
+  "volume": { "m5": 6.72, "h1": 6.72, "h6": 6.72, "h24": 6.72 },
+  "volumeBuy": { "m5": 6.72, "h1": 6.72, "h6": 6.72, "h24": 6.72 },
+  "priceChange": { "m5": 0.32, "h1": 0.32, "h6": 0.32, "h24": 0.32 },
+  "liquidity": { "usd": 1341.69, "base": 68313412938, "quote": 111.1055 },
+  "marketCap": 676,
+  "pairCreatedAt": 1713587392000,
   "c": "a",
   "a": "dedust"
 }
