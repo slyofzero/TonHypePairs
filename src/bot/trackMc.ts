@@ -30,7 +30,7 @@ export async function trackMC() {
         fdv: marketCap,
         pairAddress: address,
         baseToken,
-        liquidity,
+        liquidity: cur_liq,
       } = firstPair;
       const { address: tokenAddress, symbol } = baseToken;
 
@@ -50,7 +50,7 @@ export async function trackMC() {
         const exactIncrease = Number((currentMC / initialMC).toFixed(2));
         const increase = Math.floor(exactIncrease);
 
-        if (increase > 1 && increase > pastBenchmark && liquidity.usd >= 1000) {
+        if (increase > 1 && increase > pastBenchmark) {
           log(`Token ${tokenAddress} increased by ${increase}x`);
           hypeNewPairs[token] = {
             initialMC,
@@ -63,7 +63,14 @@ export async function trackMC() {
           const tokenLink = `https://tonviewer.com/${tokenAddress}`;
           const dexScreenerLink = `https://dexscreener.com/ton/${address}`;
 
-          const text = `Powered By [Solana Hype Alerts](https://t.me/SolanaHypeTokenAlerts)
+          const liquidity = cleanUpBotMessage(
+            formatToInternational(cur_liq.quote.toFixed(2))
+          );
+          const liquidityUsd = cleanUpBotMessage(
+            formatToInternational(cur_liq.usd)
+          );
+
+          const text = `Powered By [Ton Hype Alerts](https://t.me/TonHypeAlerts)
 
 [${hardCleanUpBotMessage(symbol)}](${tokenLink}) jumped by ${cleanUpBotMessage(
             exactIncrease
@@ -71,6 +78,7 @@ export async function trackMC() {
 
 💲 MC when found: $${cleanUpBotMessage(formatToInternational(initialMC))}
 💲 MC now: $${cleanUpBotMessage(formatToInternational(currentMC))}
+🏦 Liquidity: ${liquidity} TON *\\($${liquidityUsd}\\)*
 
 [DexScreener](${dexScreenerLink}) \\| [TonViewer](${tokenLink})${promoText}`;
 
