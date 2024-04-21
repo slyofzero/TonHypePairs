@@ -50,7 +50,7 @@ export async function trackMC() {
         const exactIncrease = Number((currentMC / initialMC).toFixed(2));
         const increase = Math.floor(exactIncrease);
 
-        if (increase > 1 && increase > pastBenchmark) {
+        if (increase > 1 && increase > pastBenchmark && cur_liq.quote > 50) {
           log(`Token ${tokenAddress} increased by ${increase}x`);
           hypeNewPairs[token] = {
             initialMC,
