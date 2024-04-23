@@ -62,7 +62,7 @@ export const client = new Api(httpClient);
       const { pairs } = data as { pairs: WSSPairData[] | undefined };
       const lastFetched = getSecondsElapsed(fetchedAt);
 
-      if (pairs && lastFetched > 10) {
+      if (pairs && lastFetched > 60) {
         fetchedAt = getNowTimestamp();
         await sendAlert(pairs);
         trackMC();
