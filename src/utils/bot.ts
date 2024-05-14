@@ -23,6 +23,7 @@ export function hardCleanUpBotMessage(text: any) {
     .replace(/`/g, "\\`")
     .replace(/!/g, "\\!")
     .replace(/#/g, "\\#")
+    .replace(/\+/g, "\\+")
     .replace(/\*/g, "\\*");
 
   return text;
